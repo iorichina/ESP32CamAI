@@ -10,12 +10,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Size;
@@ -26,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -40,25 +38,12 @@ import androidx.fragment.app.Fragment;
 import com.p4f.esp32camai.tflite.Classifier;
 import com.p4f.esp32camai.tflite.TFLiteObjectDetectionSSDAPIModel;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.SocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import android.graphics.Point;
-
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.CvException;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.tracking.Tracker;
@@ -68,6 +53,16 @@ import org.opencv.tracking.TrackerMIL;
 import org.opencv.tracking.TrackerMOSSE;
 import org.opencv.tracking.TrackerMedianFlow;
 import org.opencv.tracking.TrackerTLD;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Esp32CameraFragment extends Fragment{
 
@@ -207,9 +202,16 @@ public class Esp32CameraFragment extends Fragment{
 
         mServerImageView = (ImageView)rootView.findViewById(R.id.imageView);
         Button streamBtn = (Button) rootView.findViewById(R.id.streamBtn);
+        EditText ipInput = rootView.findViewById(R.id.ip_input);
         streamBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
+                String val = ipInput.getText().toString();
+                if (null != val && !val.isEmpty()) {
+                    String[] split = val.split(":");
+                    mServerAddressBroadCast = split[0];
+                    mServerPort = split.length > 1 ? Integer.parseInt(split[1]) : mServerPort;
+                }
                 if (!mStream) {
                     try {
                         mServerAddr = InetAddress.getByName(mServerAddressBroadCast);
@@ -229,6 +231,8 @@ public class Esp32CameraFragment extends Fragment{
                         cnt--;
                     }
                     if (res.first != null) {
+                        ipInput.setVisibility(View.INVISIBLE);
+
                         Log.d(TAG, res.first.toString() + ":" + res.second);
                         mServerExactAddress = res.first.toString().split(":")[0].replace("/","");
                         mStream = true;
