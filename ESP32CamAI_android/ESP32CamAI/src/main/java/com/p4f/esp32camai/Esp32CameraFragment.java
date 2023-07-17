@@ -86,7 +86,7 @@ public class Esp32CameraFragment extends Fragment{
     final String TAG = "ExCameraFragment";
 
     private UDPSocket mUdpClient;
-    private String mServerAddressBroadCast = "255.255.255.255";
+    private String mServerAddressBroadCast = "192.168.155.35";
     InetAddress mServerAddr;
     int mServerPort = 6868;
     final byte[] mRequestConnect      = new byte[]{'w','h','o','a','m','i'};
@@ -216,6 +216,11 @@ public class Esp32CameraFragment extends Fragment{
                     }catch (Exception e){
 
                     }
+                    /*{
+                        Toast toast = Toast.makeText(getActivity(), "Connect to " + mServerAddr.toString() + ":" + mServerPort, Toast.LENGTH_LONG);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                    }*/
                     mUdpClient.sendBytes(mServerAddr, mServerPort, mRequestConnect);
                     Pair<SocketAddress, String> res = mUdpClient.getResponse();
                     int cnt = 3;
@@ -238,7 +243,7 @@ public class Esp32CameraFragment extends Fragment{
                     }else{
                         Toast toast =
                                 Toast.makeText(
-                                        getActivity(), "Cannot connect to ESP32 Camera", Toast.LENGTH_LONG);
+                                        getActivity(), "Cannot connect to ESP32 Camera " + mServerAddr.toString() + ":" + mServerPort + " from udp " + mUdpClient.remoteAddr + ":" + mUdpClient.myPort + " with error " +mUdpClient.latestError+"@"+mUdpClient.latestAddr+":"+mUdpClient.latestPort, Toast.LENGTH_LONG);
                         toast.setGravity(Gravity.CENTER, 0, 0);
                         toast.show();
                     }

@@ -18,10 +18,13 @@ public class UDPSocket {
 
     private AsyncTask<Void, Void, Void> async_server;
     private boolean serverRunning = true;
-    private int myPort = 6969;
+    public int myPort = 6969;
     boolean responseReady = false;
-    SocketAddress remoteAddr;
+    public SocketAddress remoteAddr;
     protected final Object lockResult = new Object();
+    public String latestError;
+    public InetAddress latestAddr;
+    public int latestPort;
 
     UDPSocket(int port){
         myPort = port;
@@ -71,10 +74,12 @@ public class UDPSocket {
                     ds = new DatagramSocket(myPort+1);
                     DatagramPacket dp;
                     dp = new DatagramPacket(data, data.length, addr, port);
+                    latestAddr = addr;
+                    latestPort = port;
                     ds.setBroadcast(true);
                     ds.send(dp);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    latestError = e.toString() + "@async_client:" + addr + ":" + port;
                 } finally {
                     if (ds != null) {
                         ds.close();
@@ -128,7 +133,7 @@ public class UDPSocket {
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
+                    latestError = e.toString() + "@async_server:" + remoteAddr + ":" + myPort;
                 }
                 finally
                 {
@@ -155,6 +160,7 @@ public class UDPSocket {
                     responseReady = true;
                 }catch (Exception e){
                     Log.d("Exception when waiting on receivedMessage", ": "+e.getMessage());
+                    latestError = e.toString() + "@getResponse:" + latestAddr + ":" + latestPort;
                 }
             }
             ret = new Pair<>(remoteAddr,receivedMessage);
