@@ -252,6 +252,7 @@ public class Esp32CameraFragment extends Fragment{
                         toast.show();
                     }
                 } else {
+                    ipInput.setVisibility(View.VISIBLE);
                     mStream = false;
                     mWebSocketClient.close();
                     ((Button) getActivity().findViewById(R.id.streamBtn)).setBackgroundResource(R.drawable.my_button_bg);
